@@ -24,30 +24,6 @@ public class ApplicationExceptionHandler {
     @Autowired
     private HttpServletRequest request;
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ParameterErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
-
-        List<ParameterErrorDetail> errors = new ArrayList<>();
-
-        Map<String, String> validationErrors = new HashMap<>();
-        for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
-            String propertyPath = violation.getPropertyPath().toString();
-            int lastIndex = propertyPath.lastIndexOf('.');
-            errors.add(new ParameterErrorDetail(lastIndex != -1 ? propertyPath.substring(lastIndex + 1) : propertyPath, violation.getMessage()));
-        }
-
-        ParameterErrorResponse parameterErrorResponse = new ParameterErrorResponse();
-        parameterErrorResponse.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-        parameterErrorResponse.setStatus("Bed Request");
-        parameterErrorResponse.setCode(HttpStatus.BAD_REQUEST.value());
-        parameterErrorResponse.setMessage("Validation failed");
-        parameterErrorResponse.setPath(request.getRequestURI());
-        parameterErrorResponse.setData(new ParameterErrorData(errors));
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(parameterErrorResponse);
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {

@@ -30,11 +30,7 @@ public class BatteriesController {
     private HttpServletRequest request;
 
     @PostMapping
-    public ResponseEntity<?> saveBatteries(@RequestBody @Valid BatteriesDto userRequest, BindingResult result) throws ExistingException {
-
-        if (result.hasErrors()){
-            return buildValidationErrorResponse(result);
-        }
+    public ResponseEntity<?> saveBatteries(@RequestBody @Valid BatteriesDto userRequest) throws ExistingException {
 
         Batteries user = service.saveBatteries(userRequest);
         ResponseDto responseDto = new ResponseDto();
@@ -47,7 +43,6 @@ public class BatteriesController {
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
-
     @GetMapping
     public BatteryResponse getBatteriesByPostCodeRange(@RequestParam String postCodeRange) {
         String[] range = postCodeRange.split("-");
@@ -55,22 +50,6 @@ public class BatteriesController {
         String endPostCode = range[1];
         return service.getBatteriesByPostCodeRange(startPostCode, endPostCode);
     }
-
-    public ResponseEntity<ErrorResponse> buildValidationErrorResponse(BindingResult result) {
-        List<ErrorDetail> errors = result.getFieldErrors().stream()
-                .map(error -> new ErrorDetail(error.getField(), error.getDefaultMessage()))
-                .collect(Collectors.toList());
-
-        ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-        errorResponse.setStatus("Bed Request");
-        errorResponse.setCode(HttpStatus.BAD_REQUEST.value());
-        errorResponse.setMessage("Validation failed");
-        errorResponse.setPath(request.getRequestURI());
-        errorResponse.setData(new ErrorData(errors));
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-    }
-
 
 }
 
